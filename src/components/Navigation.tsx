@@ -1,8 +1,8 @@
-
 import { Home, Map, User, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "react-router-dom";
+import { Logo } from "./Logo";
 
 type NavItem = {
   title: string;
