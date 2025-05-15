@@ -12,6 +12,10 @@ import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./components/ThemeProvider";
 import CreateTripPage from "./pages/CreateTripPage";
 import TripDetailsPage from "./pages/TripDetailsPage";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
+import LogoutPage from "./pages/auth/LogoutPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +33,13 @@ const App = () => (
             <Route path="/trips/:tripId" element={<TripDetailsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            
+            {/* Auth Routes */}
+            <Route path="/auth/login" element={<LoginPage />} />
+            <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/auth/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/auth/logout" element={<LogoutPage />} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

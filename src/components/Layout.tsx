@@ -2,7 +2,6 @@
 import { ThemeToggle } from "./ThemeToggle";
 import { Navigation } from "./Navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Logo } from "./Logo";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,19 +12,14 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="flex min-h-screen">
-        <Navigation />
-        <div className="flex flex-1 flex-col">
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
-            {isMobile && <Logo size="small" />}
-            <div className="ml-auto flex items-center gap-4">
-              <ThemeToggle />
-            </div>
-          </header>
-          <main className="flex-1 p-4 md:p-6">
-            {children}
-          </main>
+      <Navigation />
+      <main className="pt-16 pb-16 md:pt-20 md:pb-0 p-4 md:p-6">
+        <div className="container mx-auto">
+          {children}
         </div>
+      </main>
+      <div className="fixed top-4 right-4 z-20">
+        <ThemeToggle />
       </div>
     </div>
   );
