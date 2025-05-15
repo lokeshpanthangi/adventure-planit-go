@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -63,7 +63,7 @@ export default function RegisterPage() {
   // Calculate password strength whenever password changes
   const watchPassword = form.watch("password");
   
-  React.useEffect(() => {
+  useEffect(() => {
     if (!watchPassword) {
       setPasswordStrength(0);
       return;
