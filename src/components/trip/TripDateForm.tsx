@@ -93,7 +93,10 @@ export function TripDateForm({ tripData, updateTripData, onNext, onBack }: TripD
                     initialFocus
                     mode="range"
                     defaultMonth={field.value?.from}
-                    selected={field.value}
+                    selected={{
+                      from: field.value?.from || undefined,
+                      to: field.value?.to || undefined
+                    }}
                     onSelect={field.onChange}
                     numberOfMonths={2}
                     disabled={(date) => date < new Date()}

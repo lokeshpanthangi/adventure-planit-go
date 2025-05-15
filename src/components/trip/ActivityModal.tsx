@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
-import { Calendar, MapPin, DollarSign, Image, Category } from "lucide-react";
+import { Calendar, MapPin, DollarSign, Image, Tag } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -202,6 +201,7 @@ export function ActivityModal({
                               return date < start || date > end;
                             }}
                             initialFocus
+                            className="p-3 pointer-events-auto"
                           />
                         </div>
                       </PopoverContent>
@@ -251,8 +251,6 @@ export function ActivityModal({
                   <FormLabel>Estimated Cost</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input type="number" min="0" step="0.01" {...field} />
-                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span className="text-sm text-muted-foreground">$</span>
                       </div>
