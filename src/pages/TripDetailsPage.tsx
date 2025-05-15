@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TripTimeline } from "@/components/trip/TripTimeline";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedPage } from "@/components/AnimatedPage";
+import { motion } from "framer-motion";
+import { staggerChildren, slideUp } from "@/lib/animation";
 
 // Demo trip data - in a real app, this would come from an API
 const DEMO_TRIP = {
@@ -90,7 +93,12 @@ const TripDetailsPage = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="space-y-6">
+        <motion.div 
+          className="space-y-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
           <Skeleton className="h-[300px] w-full" />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Skeleton className="h-24" />
@@ -100,7 +108,7 @@ const TripDetailsPage = () => {
           <Skeleton className="h-10 w-1/3" />
           <Skeleton className="h-4 w-1/4" />
           <Skeleton className="h-[200px]" />
-        </div>
+        </motion.div>
       </Layout>
     );
   }
@@ -108,7 +116,12 @@ const TripDetailsPage = () => {
   if (!trip) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center py-20">
+        <motion.div 
+          className="flex flex-col items-center justify-center py-20"
+          variants={slideUp}
+          initial="hidden"
+          animate="visible"
+        >
           <h1 className="text-2xl font-bold mb-4">Trip not found</h1>
           <p className="text-muted-foreground mb-6">
             The trip you're looking for doesn't exist or you don't have access to it.
@@ -116,39 +129,49 @@ const TripDetailsPage = () => {
           <Button asChild>
             <Link to="/trips">Back to My Trips</Link>
           </Button>
-        </div>
+        </motion.div>
       </Layout>
     );
   }
   
   return (
     <Layout>
-      <Tabs defaultValue="dashboard" className="w-full">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <TabsList>
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-          </TabsList>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Share className="mr-2 h-4 w-4" />
-              Share
-            </Button>
-            <Button size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Activity
-            </Button>
-          </div>
-        </div>
-        
-        <TabsContent value="dashboard" className="mt-0">
-          <TripDashboard trip={trip} />
-        </TabsContent>
-        
-        <TabsContent value="timeline" className="mt-0">
-          <TripTimeline trip={trip} />
-        </TabsContent>
-      </Tabs>
+      <AnimatedPage animation="fade">
+        <Tabs defaultValue="dashboard" className="w-full">
+          <motion.div 
+            className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            variants={staggerChildren(0.1)}
+            initial="hidden"
+            animate="visible"
+          >
+            <motion.div variants={slideUp}>
+              <TabsList>
+                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
+              </TabsList>
+            </motion.div>
+            
+            <motion.div className="flex gap-2" variants={slideUp}>
+              <Button variant="outline" size="sm" className="group">
+                <Share className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                Share
+              </Button>
+              <Button size="sm" className="group">
+                <Plus className="mr-2 h-4 w-4 group-hover:rotate-90 transition-transform" />
+                Add Activity
+              </Button>
+            </motion.div>
+          </motion.div>
+          
+          <TabsContent value="dashboard" className="mt-0">
+            <TripDashboard trip={trip} />
+          </TabsContent>
+          
+          <TabsContent value="timeline" className="mt-0">
+            <TripTimeline trip={trip} />
+          </TabsContent>
+        </Tabs>
+      </AnimatedPage>
     </Layout>
   );
 };

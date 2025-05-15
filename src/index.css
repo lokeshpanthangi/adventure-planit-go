@@ -43,6 +43,18 @@
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 214 32% 91%;
     --sidebar-ring: 210 87% 50%;
+    
+    /* Animation durations */
+    --animation-duration-fast: 150ms;
+    --animation-duration-normal: 300ms;
+    --animation-duration-slow: 500ms;
+    
+    /* Animation ease curves */
+    --animation-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --animation-ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --animation-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .dark {
@@ -112,5 +124,47 @@
 
   .gradient-background {
     @apply bg-gradient-to-br from-primary-light via-secondary-light to-accent-light dark:from-primary-dark dark:via-secondary-dark dark:to-accent-dark;
+  }
+  
+  /* Focus state animation */
+  input:focus, textarea:focus, select:focus {
+    @apply transition-all duration-300 outline-none ring-2 ring-primary/50;
+  }
+  
+  /* Button hover and active states */
+  button:not(:disabled) {
+    @apply transition-all duration-300;
+  }
+  
+  /* Improved checkbox styling */
+  input[type="checkbox"] {
+    @apply transition-all duration-150;
+  }
+  
+  /* Smooth page transitions */
+  .page-transition-enter {
+    @apply opacity-0;
+  }
+  
+  .page-transition-enter-active {
+    @apply opacity-100 transition-opacity duration-300;
+  }
+  
+  .page-transition-exit {
+    @apply opacity-100;
+  }
+  
+  .page-transition-exit-active {
+    @apply opacity-0 transition-opacity duration-300;
+  }
+  
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
