@@ -1,3 +1,4 @@
+
 import { Home, Map, User, Settings } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,8 @@ export function Navigation() {
     return (
       <nav className="fixed bottom-0 left-0 z-10 flex w-full justify-around border-t bg-background p-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+            (item.path === "/trips" && location.pathname.startsWith("/trips"));
           return (
             <Link
               key={item.title}
@@ -72,7 +74,8 @@ export function Navigation() {
       </div>
       <div className="space-y-2">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path || 
+            (item.path === "/trips" && location.pathname.startsWith("/trips"));
           return (
             <Link
               key={item.title}
