@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session) {
           const user = await authService.getUser();
           setUser(user);
+          console.log("Found existing session for user:", user?.email);
         } else {
           setUser(null);
         }
@@ -92,28 +93,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       console.log("Attempting login for:", email);
-      const { session } = await authService.login(email, password);
       
-      if (!session) {
-        throw new Error("Failed to create session");
+      try {
+        const { session } = await authService.login(email, password);
+        
+        if (!session) {
+          throw new Error("Failed to create session");
+        }
+        
+        // Use getUser to fetch the complete profile
+        const user = await authService.getUser();
+        setUser(user);
+        
+        toast({
+          title: "Welcome back!",
+          description: `You've successfully logged in as ${user?.username || email}`,
+        });
+      } catch (error: any) {
+        console.error("Login error:", error);
+        
+        // Special handling for unverified emails
+        if (error.message === "Email not confirmed") {
+          toast({
+            variant: "destructive",
+            title: "Email not verified",
+            description: "Please check your email and verify your account before logging in.",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Login failed",
+            description: error.message || "Invalid email or password",
+          });
+        }
+        throw error;
       }
-      
-      // Use getUser to fetch the complete profile
-      const user = await authService.getUser();
-      setUser(user);
-      
-      toast({
-        title: "Welcome back!",
-        description: `You've successfully logged in as ${user?.username || email}`,
-      });
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: error.message || "Invalid email or password",
-      });
-      throw error;
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,21 +14,38 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  // If user is already logged in, redirect to trips page
+  useEffect(() => {
+    if (user) {
+      navigate("/trips");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!email.trim() || !password.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please enter both email and password",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
       await login(email, password);
-      navigate("/trips");
+      // Navigation is handled by the useEffect that watches the user state
     } catch (error: any) {
       console.error("Login error:", error);
-      // Error is already handled in the useAuth hook with toast notifications
-      // We don't need to show another toast here
+      // Error is handled in the useAuth hook
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +73,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
+                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
@@ -76,6 +94,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
+                  autoComplete="current-password"
                 />
               </div>
             </CardContent>

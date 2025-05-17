@@ -49,7 +49,8 @@ export function Navigation() {
   const isMobile = useIsMobile();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
-  const isLoggedIn = true; // This will be replaced with actual auth state later
+  const { user } = useAuth(); // Use the useAuth hook to get the current user
+  const isLoggedIn = !!user; // Determine login status based on user
   
   // Mobile Navigation
   if (isMobile) {
@@ -91,6 +92,10 @@ export function Navigation() {
               <div className="mt-4 space-y-2">
                 {isLoggedIn ? (
                   <>
+                    <div className="p-3 mb-2">
+                      <p className="text-sm font-medium">Signed in as</p>
+                      <p className="text-primary">{user?.username || user?.email}</p>
+                    </div>
                     <Link to="/auth/logout" className="w-full">
                       <Button variant="outline" className="w-full" onClick={() => setIsOpen(false)}>
                         Logout
@@ -182,13 +187,17 @@ export function Navigation() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://github.com/shadcn.png" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarImage src={user?.avatar_url || ''} />
+                    <AvatarFallback>
+                      {user?.username ? user.username.substring(0, 2).toUpperCase() : 'U'}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  {user?.username || user?.email || 'My Account'}
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <Link to="/profile">
                   <DropdownMenuItem>Profile</DropdownMenuItem>

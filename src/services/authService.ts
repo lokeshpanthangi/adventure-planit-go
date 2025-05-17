@@ -13,31 +13,36 @@ export const authService = {
     if (authError) throw authError;
     if (!auth.user?.id) throw new Error("Failed to create user account");
 
-    // 2. Create user profile in the public.users table - THIS IS WHERE THE RLS ERROR OCCURS
-    // Instead of directly inserting to the users table, we should let Supabase handle
-    // this via a database trigger that runs with proper privileges
-    // We'll just update with some metadata in case we need it later
+    // 2. Update user metadata
     await supabase.auth.updateUser({
       data: {
         username,
       }
     });
-    
-    // Note: We're removing the direct insert to users table as this is causing the RLS error
-    // The user record should be created by a database trigger when a new auth user is created
   },
 
   async login(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) throw error;
-    
-    // Instead of immediately updating the last_login (which might cause RLS issues),
-    // we'll return the data and let the auth context handle the session update
-    return data;
+    try {
+      console.log("Attempting login with:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) {
+        // Handle specific error cases
+        if (error.message === "Email not confirmed") {
+          // This is actually common, we'll handle this specifically in the UI
+          console.log("Email not confirmed, but proceeding with login attempt");
+        }
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error("Login error in authService:", error);
+      throw error;
+    }
   },
 
   async logout() {
@@ -74,10 +79,10 @@ export const authService = {
           username: authUser.user.user_metadata?.username || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          bio: null,                   // Added missing properties with default values
-          avatar_url: null,            // to satisfy TypeScript
+          bio: null,
+          avatar_url: null,
           last_login: null,
-          password_hash: '',           // We don't have access to this, but need to include it
+          password_hash: '',
           preferences: {}
         };
       }
