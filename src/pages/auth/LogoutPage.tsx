@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import AnimatedPage from "@/components/AnimatedPage";
+import { AnimatedPage } from "@/components/AnimatedPage";
 
 export default function LogoutPage() {
   const { logout } = useAuth();

@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
-import AnimatedPage from "@/components/AnimatedPage";
+import { AnimatedPage } from "@/components/AnimatedPage";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
