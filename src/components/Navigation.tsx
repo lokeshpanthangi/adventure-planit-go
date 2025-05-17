@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "./ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 type NavItem = {
   title: string;
