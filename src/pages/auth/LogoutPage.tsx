@@ -1,28 +1,39 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
+import AnimatedPage from "@/components/AnimatedPage";
 
 export default function LogoutPage() {
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Clear local storage
-    localStorage.removeItem("user");
-    localStorage.removeItem("rememberMe");
-    
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account.",
-    });
-    
-    // Redirect to login page
-    navigate("/auth/login");
-  }, [navigate]);
+    const performLogout = async () => {
+      try {
+        await logout();
+        navigate("/");
+      } catch (error) {
+        console.error("Logout error:", error);
+        navigate("/");
+      }
+    };
+
+    performLogout();
+  }, [logout, navigate]);
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <p className="text-center text-muted-foreground">Logging out...</p>
-    </div>
+    <AnimatedPage>
+      <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-6 space-y-4">
+            <Spinner size="lg" />
+            <p>Logging out...</p>
+          </CardContent>
+        </Card>
+      </div>
+    </AnimatedPage>
   );
 }

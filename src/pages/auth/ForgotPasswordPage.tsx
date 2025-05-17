@@ -1,119 +1,101 @@
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Link } from "react-router-dom";
-import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Logo } from "@/components/Logo";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { toast } from "@/hooks/use-toast";
-
-const forgotPasswordSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address" }),
-});
-
-type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/hooks/useAuth";
+import AnimatedPage from "@/components/AnimatedPage";
 
 export default function ForgotPasswordPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { resetPassword } = useAuth();
 
-  const form = useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: {
-      email: "",
-    },
-  });
-
-  function onSubmit(values: ForgotPasswordFormValues) {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
-    
-    // Mock password reset process
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
-      
-      toast({
-        title: "Reset link sent",
-        description: "Check your email for a password reset link.",
-      });
-    }, 1500);
-  }
 
-  if (isSubmitted) {
-    return (
-      <Layout>
-        <div className="flex min-h-[80vh] items-center justify-center">
-          <div className="mx-auto w-full max-w-md space-y-8">
-            <div className="flex flex-col items-center space-y-4">
-              <Logo size="large" />
-              <h1 className="text-2xl font-bold">Check your email</h1>
-              <p className="text-center text-sm text-muted-foreground">
-                We've sent a password reset link to your email address. Please check your inbox.
-              </p>
-              <div className="pt-4">
-                <Link to="/auth/login">
-                  <Button variant="outline">Back to login</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+    try {
+      await resetPassword(email);
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error("Reset password error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <Layout>
-      <div className="flex min-h-[80vh] items-center justify-center">
-        <div className="mx-auto w-full max-w-md space-y-8">
-          <div className="flex flex-col items-center space-y-4">
-            <Logo size="large" />
-            <h1 className="text-2xl font-bold">Forgot your password?</h1>
-            <p className="text-center text-sm text-muted-foreground">
-              No problem. Enter your email and we'll send you a reset link.
-            </p>
-          </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="you@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Sending..." : "Send reset link"}
-              </Button>
+    <AnimatedPage>
+      <div className="flex items-center justify-center min-h-screen p-4 bg-background">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">Reset Password</CardTitle>
+            <CardDescription className="text-center">
+              {isSubmitted ? 
+                "Check your email for reset instructions" : 
+                "Enter your email and we'll send you instructions to reset your password"}
+            </CardDescription>
+          </CardHeader>
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex flex-col space-y-4">
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending..." : "Send Reset Instructions"}
+                </Button>
+                <div className="text-center text-sm">
+                  Remember your password?{" "}
+                  <Link to="/auth/login" className="text-primary hover:underline">
+                    Back to login
+                  </Link>
+                </div>
+              </CardFooter>
             </form>
-          </Form>
-
-          <div className="text-center text-sm">
-            Remember your password?{" "}
-            <Link to="/auth/login" className="font-medium text-primary hover:underline">
-              Back to login
-            </Link>
-          </div>
-        </div>
+          ) : (
+            <CardContent className="space-y-6">
+              <div className="text-center p-6">
+                <div className="my-4 text-muted-foreground">
+                  We've sent an email to <strong>{email}</strong> with instructions to reset your password.
+                </div>
+              </div>
+              <div className="flex flex-col space-y-4">
+                <Button 
+                  onClick={() => setIsSubmitted(false)}
+                  variant="outline"
+                >
+                  Try another email
+                </Button>
+                <Link to="/auth/login">
+                  <Button variant="link" className="w-full">
+                    Back to login
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          )}
+        </Card>
       </div>
-    </Layout>
+    </AnimatedPage>
   );
 }
