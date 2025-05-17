@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserInsert, UserUpdate } from "@/types/database";
 
@@ -13,26 +12,18 @@ export const authService = {
     if (authError) throw authError;
     if (!auth.user?.id) throw new Error("Failed to create user account");
 
-    // 2. Create user profile in the public.users table
-    const userProfile: UserInsert = {
-      id: auth.user.id,
-      email,
-      username,
-      password_hash: '**********', // We don't store actual passwords, auth handles this
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-
-    const { error: profileError } = await supabase
-      .from('users')
-      .insert(userProfile);
-
-    if (profileError) {
-      // If profile creation fails, we should clean up the auth user
-      // This is a best effort and might fail if the user is already confirmed
-      await supabase.auth.admin.deleteUser(auth.user.id);
-      throw profileError;
-    }
+    // 2. Create user profile in the public.users table - THIS IS WHERE THE RLS ERROR OCCURS
+    // Instead of directly inserting to the users table, we should let Supabase handle
+    // this via a database trigger that runs with proper privileges
+    // We'll just update with some metadata in case we need it later
+    await supabase.auth.updateUser({
+      data: {
+        username,
+      }
+    });
+    
+    // Note: We're removing the direct insert to users table as this is causing the RLS error
+    // The user record should be created by a database trigger when a new auth user is created
   },
 
   async login(email: string, password: string) {
