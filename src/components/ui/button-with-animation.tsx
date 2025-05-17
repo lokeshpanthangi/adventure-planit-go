@@ -21,7 +21,6 @@ interface ButtonWithAnimationProps
 
 const ButtonWithAnimation = React.forwardRef<HTMLButtonElement, ButtonWithAnimationProps>(
   ({ className, variant, size, asChild = false, animationType = "scale", ...props }, ref) => {
-    const Comp = asChild ? Slot : Button;
     const buttonRef = React.useRef<HTMLButtonElement>(null);
     const [isActive, setIsActive] = React.useState(false);
 
@@ -59,10 +58,24 @@ const ButtonWithAnimation = React.forwardRef<HTMLButtonElement, ButtonWithAnimat
       }
     }, [animationType, isActive]);
 
+    const combinedClassName = cn(animationClass, className);
+    
+    if (asChild) {
+      return (
+        <Slot
+          ref={buttonRef || ref}
+          className={combinedClassName}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          {...props}
+        />
+      );
+    }
+
     return (
-      <Comp
+      <Button
         ref={buttonRef || ref}
-        className={cn(animationClass, className)}
+        className={combinedClassName}
         variant={variant}
         size={size}
         onMouseDown={handleMouseDown}
