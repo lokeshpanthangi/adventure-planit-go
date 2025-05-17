@@ -42,7 +42,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      // Navigation is handled by the useEffect that watches the user state
+      navigate("/trips");
     } catch (error: any) {
       console.error("Login error:", error);
       // Error is handled in the useAuth hook
