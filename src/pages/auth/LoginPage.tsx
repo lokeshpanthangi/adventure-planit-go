@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/hooks/useAuth";
 import { AnimatedPage } from "@/components/AnimatedPage";
+import { useToast } from "@/hooks/use-toast";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +16,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,8 +25,10 @@ export default function LoginPage() {
     try {
       await login(email, password);
       navigate("/trips");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
+      // Error is already handled in the useAuth hook with toast notifications
+      // We don't need to show another toast here
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +85,14 @@ export default function LoginPage() {
                 className="w-full" 
                 disabled={isLoading}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                {isLoading ? (
+                  <div className="flex items-center justify-center">
+                    <Spinner size="sm" className="mr-2" />
+                    <span>Signing in...</span>
+                  </div>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
               <div className="text-center text-sm">
                 Don't have an account?{" "}

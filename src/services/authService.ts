@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, UserInsert, UserUpdate } from "@/types/database";
 
@@ -34,14 +35,8 @@ export const authService = {
     
     if (error) throw error;
     
-    // Update last_login in users table
-    if (data.user) {
-      await supabase
-        .from('users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', data.user.id);
-    }
-    
+    // Instead of immediately updating the last_login (which might cause RLS issues),
+    // we'll return the data and let the auth context handle the session update
     return data;
   },
 
@@ -62,15 +57,31 @@ export const authService = {
     
     if (!authUser.user) return null;
     
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', authUser.user.id)
-      .single();
+    // Check if we have a user record in our users table
+    try {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authUser.user.id)
+        .single();
+        
+      if (error || !user) {
+        // Return basic user information from auth even if we don't have a profile
+        return {
+          id: authUser.user.id,
+          email: authUser.user.email || '',
+          username: authUser.user.user_metadata?.username || '',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          preferences: {}
+        };
+      }
       
-    if (error || !user) return null;
-    
-    return user;
+      return user;
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
   },
   
   async updateUser(id: string, updates: UserUpdate): Promise<User> {

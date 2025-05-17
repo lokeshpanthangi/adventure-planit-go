@@ -22,37 +22,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch the user data if they're already logged in
-    const fetchUser = async () => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event);
+        if (session) {
+          try {
+            const user = await authService.getUser();
+            setUser(user);
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+            setUser(null);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    const checkSession = async () => {
       try {
-        const user = await authService.getUser();
-        setUser(user);
+        setLoading(true);
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          const user = await authService.getUser();
+          setUser(user);
+        } else {
+          setUser(null);
+        }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Error checking session:", error);
         setUser(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          // User has signed in, fetch their profile data
-          const user = await authService.getUser();
-          setUser(user);
-        } else if (event === "SIGNED_OUT") {
-          // User has signed out
-          setUser(null);
-        }
-      }
-    );
+    checkSession();
 
     return () => {
-      authListener.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -80,14 +91,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       setLoading(true);
-      await authService.login(email, password);
+      console.log("Attempting login for:", email);
+      const { session } = await authService.login(email, password);
+      
+      if (!session) {
+        throw new Error("Failed to create session");
+      }
+      
+      // Use getUser to fetch the complete profile
       const user = await authService.getUser();
       setUser(user);
+      
       toast({
         title: "Welcome back!",
         description: `You've successfully logged in as ${user?.username || email}`,
       });
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         variant: "destructive",
         title: "Login failed",
