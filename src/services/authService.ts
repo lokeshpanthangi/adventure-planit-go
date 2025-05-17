@@ -67,12 +67,17 @@ export const authService = {
         
       if (error || !user) {
         // Return basic user information from auth even if we don't have a profile
+        // Make sure we return an object that matches the User type completely
         return {
           id: authUser.user.id,
           email: authUser.user.email || '',
           username: authUser.user.user_metadata?.username || '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          bio: null,                   // Added missing properties with default values
+          avatar_url: null,            // to satisfy TypeScript
+          last_login: null,
+          password_hash: '',           // We don't have access to this, but need to include it
           preferences: {}
         };
       }
